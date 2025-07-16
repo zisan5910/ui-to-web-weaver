@@ -1,8 +1,8 @@
 
-const CACHE_NAME = 'ecommerce-app-v2';
-const STATIC_CACHE = 'static-v2';
-const DYNAMIC_CACHE = 'dynamic-v2';
-const IMAGE_CACHE = 'images-v2';
+const CACHE_NAME = 'netlistore-v3';
+const STATIC_CACHE = 'static-v3';
+const DYNAMIC_CACHE = 'dynamic-v3';
+const IMAGE_CACHE = 'images-v3';
 
 // Static assets to cache immediately
 const STATIC_ASSETS = [
@@ -10,18 +10,33 @@ const STATIC_ASSETS = [
   '/index.html',
   '/static/js/bundle.js',
   '/static/css/main.css',
-  '/manifest.json'
+  '/manifest.json',
+  // Add uploaded images to static cache
+  '/lovable-uploads/45b49ee8-3ccc-492c-9608-f089b4883e33.png',
+  '/lovable-uploads/1ce6f11c-05f5-4d00-963e-d05f6337e480.png'
 ];
 
-// Install event - cache static assets
+// Install event - cache static assets and product images
 self.addEventListener('install', (event) => {
   event.waitUntil(
-    caches.open(STATIC_CACHE)
-      .then((cache) => {
+    Promise.all([
+      caches.open(STATIC_CACHE).then((cache) => {
         console.log('Caching static assets');
         return cache.addAll(STATIC_ASSETS);
+      }),
+      caches.open(IMAGE_CACHE).then((cache) => {
+        console.log('Pre-caching product images');
+        // Pre-cache important product images
+        const productImages = [
+          'https://images.unsplash.com/photo-1605810230434-7631ac76ec81?w=400&h=600&fit=crop',
+          'https://images.unsplash.com/photo-1434494878577-86c23bcb06b9?w=400&h=600&fit=crop',
+          'https://i.postimg.cc/cLjxXSTM/images.jpg',
+          'https://images.unsplash.com/photo-1519389950473-47ba0277781c?w=400&h=600&fit=crop',
+          'https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=400&h=600&fit=crop'
+        ];
+        return cache.addAll(productImages.map(url => new Request(url, { mode: 'no-cors' })));
       })
-      .then(() => self.skipWaiting())
+    ]).then(() => self.skipWaiting())
   );
 });
 
@@ -47,22 +62,25 @@ self.addEventListener('fetch', (event) => {
   const url = new URL(request.url);
 
   // Handle images with cache-first strategy
-  if (request.destination === 'image') {
+  if (request.destination === 'image' || url.pathname.match(/\.(jpg|jpeg|png|gif|webp|svg)$/i)) {
     event.respondWith(
       caches.match(request).then((cachedResponse) => {
         if (cachedResponse) {
           return cachedResponse;
         }
         return fetch(request).then((response) => {
-          const responseClone = response.clone();
-          caches.open(IMAGE_CACHE).then((cache) => {
-            cache.put(request, responseClone);
-          });
+          // Only cache successful responses
+          if (response.status === 200) {
+            const responseClone = response.clone();
+            caches.open(IMAGE_CACHE).then((cache) => {
+              cache.put(request, responseClone);
+            });
+          }
           return response;
         }).catch(() => {
           // Return a fallback image if network fails
           return new Response(
-            '<svg width="400" height="600" xmlns="http://www.w3.org/2000/svg"><rect width="100%" height="100%" fill="#f3f4f6"/><text x="50%" y="50%" text-anchor="middle" dy=".3em" fill="#9ca3af">Image Unavailable</text></svg>',
+            '<svg width="400" height="600" xmlns="http://www.w3.org/2000/svg"><rect width="100%" height="100%" fill="#f3f4f6"/><text x="50%" y="50%" text-anchor="middle" dy=".3em" fill="#9ca3af" font-size="14">Image Unavailable</text></svg>',
             { headers: { 'Content-Type': 'image/svg+xml' } }
           );
         });
@@ -75,10 +93,12 @@ self.addEventListener('fetch', (event) => {
   if (url.pathname.startsWith('/api/')) {
     event.respondWith(
       fetch(request).then((response) => {
-        const responseClone = response.clone();
-        caches.open(DYNAMIC_CACHE).then((cache) => {
-          cache.put(request, responseClone);
-        });
+        if (response.status === 200) {
+          const responseClone = response.clone();
+          caches.open(DYNAMIC_CACHE).then((cache) => {
+            cache.put(request, responseClone);
+          });
+        }
         return response;
       }).catch(() => {
         return caches.match(request);
@@ -104,11 +124,23 @@ self.addEventListener('fetch', (event) => {
         return cachedResponse;
       }
       return fetch(request).then((response) => {
-        const responseClone = response.clone();
-        caches.open(DYNAMIC_CACHE).then((cache) => {
-          cache.put(request, responseClone);
-        });
+        if (response.status === 200) {
+          const responseClone = response.clone();
+          caches.open(DYNAMIC_CACHE).then((cache) => {
+            cache.put(request, responseClone);
+          });
+        }
         return response;
+      }).catch(() => {
+        // For CSS/JS files, return a basic fallback
+        if (request.url.includes('.css')) {
+          return new Response('/* Offline fallback */', { headers: { 'Content-Type': 'text/css' } });
+        }
+        if (request.url.includes('.js')) {
+          return new Response('console.log("Offline fallback");', { headers: { 'Content-Type': 'application/javascript' } });
+        }
+        // For other requests, return empty response
+        return new Response('Offline', { status: 503, statusText: 'Service Unavailable' });
       });
     })
   );
@@ -137,6 +169,13 @@ self.addEventListener('push', (event) => {
   };
 
   event.waitUntil(
-    self.registration.showNotification(data.title || 'Print Poka', options)
+    self.registration.showNotification(data.title || 'Netlistore', options)
   );
+});
+
+// Handle message events for cache updates
+self.addEventListener('message', (event) => {
+  if (event.data && event.data.type === 'SKIP_WAITING') {
+    self.skipWaiting();
+  }
 });

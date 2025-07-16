@@ -1,4 +1,3 @@
-
 import { useState, useMemo, useEffect } from "react";
 import { Heart, Filter, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -803,12 +802,10 @@ const Index = () => {
 
   const cartItemsCount = cartItems.reduce((total, item) => total + item.quantity, 0);
 
-  // Ensure product details page starts from the top
+  // Scroll to top on page changes
   useEffect(() => {
-    if (currentPage === "product-detail" && selectedProduct) {
-      window.scrollTo(0, 0);
-    }
-  }, [currentPage, selectedProduct]);
+    window.scrollTo(0, 0);
+  }, [currentPage, selectedProduct, isWishlistOpen]);
 
   const navigationHandlers = useMemo(() => ({
     onHomeClick: () => {
@@ -935,6 +932,7 @@ const Index = () => {
         <OfflineIndicator />
         <CartPage
           items={cartItems}
+          wishlist={wishlist}
           onUpdateQuantity={(productId, size, quantity) => {
             if (quantity === 0) {
               setCartItems(cartItems.filter(item => !(item.product.id === productId && item.size === size)));
@@ -946,6 +944,7 @@ const Index = () => {
               ));
             }
           }}
+          onToggleWishlist={toggleWishlist}
           onClose={() => {
             setCurrentPage("home");
           }}
@@ -1004,6 +1003,11 @@ const Index = () => {
           onToggleWishlist={toggleWishlist}
           onAddToCart={addToCart}
           onBack={() => setIsWishlistOpen(false)}
+          onHomeClick={navigationHandlers.onHomeClick}
+          onSearchClick={navigationHandlers.onSearchClick}
+          onCartClick={navigationHandlers.onCartClick}
+          onContactClick={navigationHandlers.onContactClick}
+          cartCount={cartItemsCount}
         />
       </div>
     );
@@ -1018,7 +1022,7 @@ const Index = () => {
       
       {/* Header */}
       <header className="sticky top-0 z-50 bg-white/95 backdrop-blur-sm border-b border-gray-100">
-        <div className="flex items-center justify-between px-4 py-3">
+        <div className="flex items-center justify-between px-4 py-3 max-w-7xl mx-auto">
           <h1 className="text-xl font-extralight tracking-widest">Netlistore</h1>
           
           <div className="flex items-center gap-1">
@@ -1041,7 +1045,7 @@ const Index = () => {
 
       {/* Simple Category Navigation with better mobile scrolling */}
       <div className="px-4 py-4 bg-white border-b border-gray-100">
-        <div className="w-full overflow-x-auto">
+        <div className="w-full overflow-x-auto max-w-7xl mx-auto">
           <div className="flex gap-2 pb-2 min-w-max">
             <Button
               variant="ghost"
@@ -1075,37 +1079,39 @@ const Index = () => {
 
       {/* Products Section */}
       <section className="px-4 py-4">
-        <div className="flex items-center justify-between mb-4">
-          <div>
-            <h2 className="text-lg font-medium">
-              {selectedCategory === "All" ? "All Products" : selectedCategory}
-            </h2>
-            {selectedSubcategory && (
-              <p className="text-sm text-gray-600 mt-1">{selectedSubcategory}</p>
-            )}
+        <div className="max-w-7xl mx-auto">
+          <div className="flex items-center justify-between mb-4">
+            <div>
+              <h2 className="text-lg font-medium">
+                {selectedCategory === "All" ? "All Products" : selectedCategory}
+              </h2>
+              {selectedSubcategory && (
+                <p className="text-sm text-gray-600 mt-1">{selectedSubcategory}</p>
+              )}
+            </div>
+            <span className="text-sm text-gray-500">{filteredProducts.length} items</span>
           </div>
-          <span className="text-sm text-gray-500">{filteredProducts.length} items</span>
+          
+          {isLoading ? (
+            <div className="flex justify-center py-12">
+              <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-black"></div>
+            </div>
+          ) : filteredProducts.length === 0 ? (
+            <div className="text-center py-12">
+              <h3 className="text-lg font-medium mb-2">No products found</h3>
+              <p className="text-gray-500">Try selecting a different category or subcategory</p>
+            </div>
+          ) : (
+            <ProductGrid 
+              products={filteredProducts}
+              wishlist={wishlist}
+              onProductClick={handleProductClick}
+              onToggleWishlist={toggleWishlist}
+              onAddToCart={addToCart}
+              onBuyNow={buyNow}
+            />
+          )}
         </div>
-        
-        {isLoading ? (
-          <div className="flex justify-center py-12">
-            <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-black"></div>
-          </div>
-        ) : filteredProducts.length === 0 ? (
-          <div className="text-center py-12">
-            <h3 className="text-lg font-medium mb-2">No products found</h3>
-            <p className="text-gray-500">Try selecting a different category or subcategory</p>
-          </div>
-        ) : (
-          <ProductGrid 
-            products={filteredProducts}
-            wishlist={wishlist}
-            onProductClick={handleProductClick}
-            onToggleWishlist={toggleWishlist}
-            onAddToCart={addToCart}
-            onBuyNow={buyNow}
-          />
-        )}
       </section>
 
       {/* Bottom Navigation */}

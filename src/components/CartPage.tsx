@@ -12,7 +12,9 @@ interface CartItem {
 
 interface CartPageProps {
   items: CartItem[];
+  wishlist: number[];
   onUpdateQuantity: (productId: number, size: string, quantity: number) => void;
+  onToggleWishlist: (productId: number) => void;
   onClose: () => void;
   onHomeClick: () => void;
   onSearchClick: () => void;
@@ -22,7 +24,9 @@ interface CartPageProps {
 
 const CartPage = ({ 
   items, 
+  wishlist,
   onUpdateQuantity, 
+  onToggleWishlist,
   onClose, 
   onHomeClick, 
   onSearchClick, 
@@ -56,7 +60,7 @@ const CartPage = ({
     <div className="min-h-screen bg-gray-50 pb-20">
       {/* Header */}
       <header className="sticky top-0 z-50 bg-white/95 backdrop-blur-sm border-b border-gray-100">
-        <div className="flex items-center justify-between px-4 py-3">
+        <div className="flex items-center justify-between px-4 py-3 max-w-4xl mx-auto">
           <Button
             variant="ghost"
             size="icon"
@@ -71,9 +75,9 @@ const CartPage = ({
       </header>
 
       {/* Content */}
-      <div className="flex flex-col min-h-screen">
+      <div className="max-w-4xl mx-auto">
         {items.length === 0 ? (
-          <div className="flex-1 flex flex-col items-center justify-center p-8 text-center">
+          <div className="flex flex-col items-center justify-center p-8 text-center min-h-[60vh]">
             <ShoppingBag className="h-16 w-16 text-gray-200 mb-4" />
             <h4 className="text-lg font-light mb-2">Your cart is empty</h4>
             <p className="text-gray-500 text-sm mb-6">Discover our beautiful products</p>
@@ -88,7 +92,7 @@ const CartPage = ({
           <>
             {/* Free Shipping Banner */}
             {total < 200 && (
-              <div className="bg-gray-50 p-3 text-center text-sm">
+              <div className="bg-gray-50 p-3 text-center text-sm mx-4 mt-4 rounded-lg">
                 <span className="text-gray-600">
                   Add ৳{(200 - total).toFixed(2)} more for free shipping
                 </span>
@@ -102,14 +106,15 @@ const CartPage = ({
             )}
 
             {/* Cart Items */}
-            <div className="flex-1 overflow-y-auto p-4 space-y-4">
+            <div className="p-4 space-y-4">
               {items.map((item, index) => (
-                <div key={`${item.product.id}-${item.size}-${index}`} className="flex gap-3">
-                  <div className="w-16 h-20 bg-gray-50 rounded-lg overflow-hidden flex-shrink-0">
+                <div key={`${item.product.id}-${item.size}-${index}`} className="flex gap-3 bg-white p-4 rounded-lg shadow-sm">
+                  <div className="w-20 h-24 bg-gray-50 rounded-lg overflow-hidden flex-shrink-0">
                     <img 
                       src={item.product.image}
                       alt={item.product.name}
                       className="w-full h-full object-cover"
+                      loading="lazy"
                     />
                   </div>
                   
@@ -145,14 +150,25 @@ const CartPage = ({
                       <Button
                         variant="ghost"
                         size="icon"
-                        className="h-7 w-7"
+                        className={`h-7 w-7 ${
+                          wishlist.includes(item.product.id)
+                            ? "text-red-500"
+                            : "text-gray-400"
+                        }`}
+                        onClick={() => onToggleWishlist(item.product.id)}
                       >
-                        <Heart className="h-3 w-3" />
+                        <Heart 
+                          className={`h-3 w-3 ${
+                            wishlist.includes(item.product.id) 
+                              ? "fill-current" 
+                              : ""
+                          }`} 
+                        />
                       </Button>
                       <Button
                         variant="ghost"
                         size="icon"
-                        className="h-7 w-7"
+                        className="h-7 w-7 text-red-500"
                         onClick={() => onUpdateQuantity(item.product.id, item.size, 0)}
                       >
                         <Trash2 className="h-3 w-3" />
@@ -161,40 +177,40 @@ const CartPage = ({
                   </div>
                 </div>
               ))}
-            </div>
 
-            {/* Footer */}
-            <div className="border-t border-gray-50 p-4 space-y-4 bg-white">
-              <div className="space-y-2 text-sm">
-                <div className="flex justify-between">
-                  <span>Subtotal</span>
-                  <span>৳{total.toFixed(2)}</span>
+              {/* Checkout Section - Now scrolls with products */}
+              <div className="bg-white p-4 rounded-lg shadow-sm space-y-4 mt-6">
+                <div className="space-y-2 text-sm">
+                  <div className="flex justify-between">
+                    <span>Subtotal</span>
+                    <span>৳{total.toFixed(2)}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Shipping</span>
+                    <span>{shipping === 0 ? "Free" : `৳${shipping.toFixed(2)}`}</span>
+                  </div>
+                  <div className="flex justify-between font-medium text-base pt-2 border-t">
+                    <span>Total</span>
+                    <span>৳{finalTotal.toFixed(2)}</span>
+                  </div>
                 </div>
-                <div className="flex justify-between">
-                  <span>Shipping</span>
-                  <span>{shipping === 0 ? "Free" : `৳${shipping.toFixed(2)}`}</span>
-                </div>
-                <div className="flex justify-between font-medium text-base pt-2 border-t">
-                  <span>Total</span>
-                  <span>৳{finalTotal.toFixed(2)}</span>
-                </div>
+                
+                <Button 
+                  className="w-full bg-black text-white hover:bg-gray-800 rounded-full"
+                  onClick={handleCheckout}
+                >
+                  Checkout
+                  <ArrowRight className="w-4 h-4 ml-2" />
+                </Button>
+                
+                <Button variant="outline" className="w-full rounded-full" onClick={onClose}>
+                  Continue Shopping
+                </Button>
+                
+                <p className="text-xs text-gray-500 text-center">
+                  Secure checkout via Google Forms
+                </p>
               </div>
-              
-              <Button 
-                className="w-full bg-black text-white hover:bg-gray-800 rounded-full"
-                onClick={handleCheckout}
-              >
-                Checkout
-                <ArrowRight className="w-4 h-4 ml-2" />
-              </Button>
-              
-              <Button variant="outline" className="w-full rounded-full" onClick={onClose}>
-                Continue Shopping
-              </Button>
-              
-              <p className="text-xs text-gray-500 text-center">
-                Secure checkout via Google Forms
-              </p>
             </div>
           </>
         )}

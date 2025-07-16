@@ -32,10 +32,27 @@ export const useOfflineStorage = () => {
     window.addEventListener('online', handleOnline);
     window.addEventListener('offline', handleOffline);
 
+    // Cache product data for offline use
+    cacheProductData();
+
     return () => {
       window.removeEventListener('online', handleOnline);
       window.removeEventListener('offline', handleOffline);
     };
+  }, []);
+
+  const cacheProductData = useCallback(() => {
+    // Cache essential app data
+    const appData = {
+      categories: [
+        "Electronics", "Fashion", "Home & Living", 
+        "Beauty & Personal Care", "Grocery & Food", 
+        "Books & Stationery", "Toys & Baby Products",
+        "Sports & Outdoors", "Automotive", "Health & Wellness"
+      ],
+      timestamp: Date.now()
+    };
+    localStorage.setItem('app-data', JSON.stringify(appData));
   }, []);
 
   const addOfflineAction = useCallback((type: string, data: any) => {
