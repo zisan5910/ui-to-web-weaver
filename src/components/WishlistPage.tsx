@@ -32,6 +32,11 @@ const WishlistPage = ({
   onContactClick,
   cartCount
 }: WishlistPageProps) => {
+  const handleHomeClick = () => {
+    onBack(); // Close wishlist page
+    onHomeClick(); // Navigate to home
+  };
+
   return (
     <div className="min-h-screen bg-gray-50 pb-20">
       {/* Header */}
@@ -60,7 +65,7 @@ const WishlistPage = ({
             <h3 className="text-lg font-light mb-2">Your wishlist is empty</h3>
             <p className="text-gray-500 text-sm mb-6">Save items you love to view them later</p>
             <Button 
-              onClick={onHomeClick}
+              onClick={handleHomeClick}
               className="bg-black text-white hover:bg-gray-800 rounded-full px-8"
             >
               Start Shopping
@@ -80,7 +85,7 @@ const WishlistPage = ({
       {/* Bottom Navigation */}
       <BottomNav 
         cartCount={cartCount}
-        onHomeClick={onHomeClick}
+        onHomeClick={handleHomeClick}
         onSearchClick={onSearchClick}
         onCartClick={onCartClick}
         onContactClick={onContactClick}
