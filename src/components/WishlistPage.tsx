@@ -60,7 +60,7 @@ const WishlistPage = ({
             <h3 className="text-lg font-light mb-2">Your wishlist is empty</h3>
             <p className="text-gray-500 text-sm mb-6">Save items you love to view them later</p>
             <Button 
-              onClick={onBack}
+              onClick={onHomeClick}
               className="bg-black text-white hover:bg-gray-800 rounded-full px-8"
             >
               Start Shopping
@@ -84,7 +84,7 @@ const WishlistPage = ({
         onSearchClick={onSearchClick}
         onCartClick={onCartClick}
         onContactClick={onContactClick}
-        activeTab="home"
+        activeTab="wishlist"
       />
     </div>
   );

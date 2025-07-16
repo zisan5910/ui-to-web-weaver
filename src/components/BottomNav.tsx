@@ -1,5 +1,5 @@
 
-import { Home, ShoppingCart, MessageCircle, Search } from "lucide-react";
+import { Home, ShoppingCart, MessageCircle, Search, Heart } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 interface BottomNavProps {

@@ -807,6 +807,36 @@ const Index = () => {
     window.scrollTo(0, 0);
   }, [currentPage, selectedProduct, isWishlistOpen]);
 
+  // Redirect functionality
+  useEffect(() => {
+    const handleRedirect = () => {
+      const urlParams = new URLSearchParams(window.location.search);
+      const redirect = urlParams.get('redirect');
+      
+      if (redirect) {
+        switch (redirect) {
+          case 'cart':
+            setCurrentPage("cart");
+            break;
+          case 'search':
+            setCurrentPage("search");
+            break;
+          case 'contact':
+            setCurrentPage("contact");
+            break;
+          case 'home':
+          default:
+            setCurrentPage("home");
+            break;
+        }
+        // Clean up URL
+        window.history.replaceState({}, document.title, window.location.pathname);
+      }
+    };
+
+    handleRedirect();
+  }, []);
+
   const navigationHandlers = useMemo(() => ({
     onHomeClick: () => {
       setCurrentPage("home");
