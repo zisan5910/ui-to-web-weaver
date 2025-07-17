@@ -19,6 +19,7 @@ interface ProductDetailPageProps {
   onSearchClick: () => void;
   onCartClick: () => void;
   onContactClick: () => void;
+  onWishlistClick: () => void;
   cartCount: number;
 }
 
@@ -35,6 +36,7 @@ const ProductDetailPage = ({
   onSearchClick,
   onCartClick,
   onContactClick,
+  onWishlistClick,
   cartCount
 }: ProductDetailPageProps) => {
   const [selectedSize, setSelectedSize] = useState<string>(product.sizes ? "" : "Default");
@@ -212,10 +214,12 @@ const ProductDetailPage = ({
       {/* Bottom Navigation */}
       <BottomNav 
         cartCount={cartCount}
+        wishlistCount={wishlist.length}
         onHomeClick={onHomeClick}
         onSearchClick={onSearchClick}
         onCartClick={onCartClick}
         onContactClick={onContactClick}
+        onWishlistClick={onWishlistClick}
         activeTab="home"
       />
     </div>

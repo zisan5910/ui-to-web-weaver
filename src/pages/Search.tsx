@@ -17,6 +17,7 @@ interface SearchProps {
   onHomeClick: () => void;
   onCartClick: () => void;
   onContactClick: () => void;
+  onWishlistClick: () => void;
   cartCount: number;
 }
 
@@ -110,6 +111,7 @@ const Search = ({
   onHomeClick,
   onCartClick,
   onContactClick,
+  onWishlistClick,
   cartCount
 }: SearchProps) => {
   const [searchQuery, setSearchQuery] = useState("");
@@ -403,10 +405,12 @@ const Search = ({
       {/* Bottom Navigation */}
       <BottomNav 
         cartCount={cartCount}
+        wishlistCount={wishlist.length}
         onHomeClick={onHomeClick}
         onSearchClick={() => {}}
         onCartClick={onCartClick}
         onContactClick={onContactClick}
+        onWishlistClick={onWishlistClick}
         activeTab="search"
       />
     </div>

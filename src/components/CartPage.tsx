@@ -1,5 +1,5 @@
 
-import { X, Plus, Minus, ShoppingBag, ArrowRight, Trash2, Heart, ArrowLeft } from "lucide-react";
+import { X, Plus, Minus, ShoppingBag, ArrowRight, Trash2, Heart, ArrowLeft, ShoppingCart } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Product } from "@/types/Product";
 import BottomNav from "@/components/BottomNav";
@@ -19,6 +19,7 @@ interface CartPageProps {
   onHomeClick: () => void;
   onSearchClick: () => void;
   onContactClick: () => void;
+  onWishlistClick: () => void;
   cartCount: number;
 }
 
@@ -30,7 +31,8 @@ const CartPage = ({
   onClose, 
   onHomeClick, 
   onSearchClick, 
-  onContactClick, 
+  onContactClick,
+  onWishlistClick, 
   cartCount 
 }: CartPageProps) => {
   const total = items.reduce((sum, item) => sum + (item.product.price * item.quantity), 0);
@@ -44,6 +46,20 @@ const CartPage = ({
     ).join('\n');
     
     const orderDetails = `Order Details:\n${orderSummary}\n\nTotal Amount: ৳${finalTotal.toFixed(2)}`;
+    
+    // Copy order details to clipboard
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(orderDetails).catch(() => {
+        console.log('Order details:', orderDetails);
+      });
+    }
+    
+    // Open the Google Form URL directly
+    window.open("https://forms.gle/pCunH9M1Z3ez9VnU9", "_blank");
+  };
+
+  const handleBuyNow = (item: CartItem) => {
+    const orderDetails = `Order Details:\n${item.product.name} (Size: ${item.size}) - Quantity: ${item.quantity}\n\nTotal Amount: ৳${(item.product.price * item.quantity).toFixed(2)}`;
     
     // Copy order details to clipboard
     if (navigator.clipboard && navigator.clipboard.writeText) {
@@ -70,7 +86,14 @@ const CartPage = ({
             <ArrowLeft className="h-4 w-4" />
           </Button>
           <h1 className="text-lg font-extralight tracking-wide">Cart</h1>
-          <div className="w-8" />
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={onWishlistClick}
+            className="h-8 w-8"
+          >
+            <Heart className="h-4 w-4" />
+          </Button>
         </div>
       </header>
 
@@ -146,32 +169,43 @@ const CartPage = ({
                   
                   <div className="flex flex-col items-end justify-between">
                     <p className="font-medium text-sm">৳{(item.product.price * item.quantity).toFixed(2)}</p>
-                    <div className="flex gap-1">
+                    <div className="flex flex-col gap-1">
+                      <div className="flex gap-1">
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className={`h-7 w-7 ${
+                            wishlist.includes(item.product.id)
+                              ? "text-red-500"
+                              : "text-gray-400"
+                          }`}
+                          onClick={() => onToggleWishlist(item.product.id)}
+                        >
+                          <Heart 
+                            className={`h-3 w-3 ${
+                              wishlist.includes(item.product.id) 
+                                ? "fill-current" 
+                                : ""
+                            }`} 
+                          />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-7 w-7 text-red-500"
+                          onClick={() => onUpdateQuantity(item.product.id, item.size, 0)}
+                        >
+                          <Trash2 className="h-3 w-3" />
+                        </Button>
+                      </div>
                       <Button
-                        variant="ghost"
-                        size="icon"
-                        className={`h-7 w-7 ${
-                          wishlist.includes(item.product.id)
-                            ? "text-red-500"
-                            : "text-gray-400"
-                        }`}
-                        onClick={() => onToggleWishlist(item.product.id)}
+                        variant="outline"
+                        size="sm"
+                        className="h-7 text-xs px-2"
+                        onClick={() => handleBuyNow(item)}
                       >
-                        <Heart 
-                          className={`h-3 w-3 ${
-                            wishlist.includes(item.product.id) 
-                              ? "fill-current" 
-                              : ""
-                          }`} 
-                        />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-7 w-7 text-red-500"
-                        onClick={() => onUpdateQuantity(item.product.id, item.size, 0)}
-                      >
-                        <Trash2 className="h-3 w-3" />
+                        <ShoppingCart className="h-3 w-3 mr-1" />
+                        Buy Now
                       </Button>
                     </div>
                   </div>
@@ -219,10 +253,12 @@ const CartPage = ({
       {/* Bottom Navigation */}
       <BottomNav 
         cartCount={cartCount}
+        wishlistCount={wishlist.length}
         onHomeClick={onHomeClick}
         onSearchClick={onSearchClick}
         onCartClick={onClose}
         onContactClick={onContactClick}
+        onWishlistClick={onWishlistClick}
         activeTab="cart"
       />
     </div>

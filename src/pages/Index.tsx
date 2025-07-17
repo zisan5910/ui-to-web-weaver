@@ -950,6 +950,7 @@ const Index = () => {
           onSearchClick={navigationHandlers.onSearchClick}
           onCartClick={navigationHandlers.onCartClick}
           onContactClick={navigationHandlers.onContactClick}
+          onWishlistClick={() => setIsWishlistOpen(true)}
           cartCount={cartItemsCount}
         />
       </div>
@@ -981,6 +982,7 @@ const Index = () => {
           onHomeClick={navigationHandlers.onHomeClick}
           onSearchClick={navigationHandlers.onSearchClick}
           onContactClick={navigationHandlers.onContactClick}
+          onWishlistClick={() => setIsWishlistOpen(true)}
           cartCount={cartItemsCount}
         />
       </div>
@@ -996,7 +998,9 @@ const Index = () => {
           onHomeClick={navigationHandlers.onHomeClick}
           onSearchClick={navigationHandlers.onSearchClick}
           onCartClick={navigationHandlers.onCartClick}
+          onWishlistClick={() => setIsWishlistOpen(true)}
           cartCount={cartItemsCount}
+          wishlist={wishlist}
         />
       </div>
     );
@@ -1016,6 +1020,7 @@ const Index = () => {
           onHomeClick={navigationHandlers.onHomeClick}
           onCartClick={navigationHandlers.onCartClick}
           onContactClick={navigationHandlers.onContactClick}
+          onWishlistClick={() => setIsWishlistOpen(true)}
           cartCount={cartItemsCount}
         />
       </div>
@@ -1147,10 +1152,12 @@ const Index = () => {
       {/* Bottom Navigation */}
       <BottomNav 
         cartCount={cartItemsCount}
+        wishlistCount={wishlist.length}
         onHomeClick={navigationHandlers.onHomeClick}
         onSearchClick={navigationHandlers.onSearchClick}
         onCartClick={navigationHandlers.onCartClick}
         onContactClick={navigationHandlers.onContactClick}
+        onWishlistClick={() => setIsWishlistOpen(true)}
         activeTab={currentPage}
       />
     </div>
