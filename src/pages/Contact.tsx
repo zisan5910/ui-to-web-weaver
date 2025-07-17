@@ -13,12 +13,10 @@ interface ContactProps {
   onHomeClick: () => void;
   onSearchClick: () => void;
   onCartClick: () => void;
-  onWishlistClick: () => void;
   cartCount: number;
-  wishlist: number[];
 }
 
-const Contact = ({ onBack, onHomeClick, onSearchClick, onCartClick, onWishlistClick, cartCount, wishlist }: ContactProps) => {
+const Contact = ({ onBack, onHomeClick, onSearchClick, onCartClick, cartCount }: ContactProps) => {
   const [formData, setFormData] = useState({
     name: "",
     subject: "",
@@ -178,12 +176,10 @@ const Contact = ({ onBack, onHomeClick, onSearchClick, onCartClick, onWishlistCl
       {/* Bottom Navigation */}
       <BottomNav 
         cartCount={cartCount}
-        wishlistCount={wishlist.length}
         onHomeClick={onHomeClick}
         onSearchClick={onSearchClick}
         onCartClick={onCartClick}
         onContactClick={() => {}}
-        onWishlistClick={onWishlistClick}
         activeTab="contact"
       />
     </div>
