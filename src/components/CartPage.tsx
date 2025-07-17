@@ -1,5 +1,5 @@
 
-import { X, Plus, Minus, ShoppingBag, ArrowRight, Trash2, Heart, ArrowLeft } from "lucide-react";
+import { X, Plus, Minus, ShoppingBag, ArrowRight, Trash2, Heart, ArrowLeft, CreditCard } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Product } from "@/types/Product";
 import BottomNav from "@/components/BottomNav";
@@ -19,6 +19,7 @@ interface CartPageProps {
   onHomeClick: () => void;
   onSearchClick: () => void;
   onContactClick: () => void;
+  onWishlistClick: () => void;
   cartCount: number;
 }
 
@@ -30,7 +31,8 @@ const CartPage = ({
   onClose, 
   onHomeClick, 
   onSearchClick, 
-  onContactClick, 
+  onContactClick,
+  onWishlistClick,
   cartCount 
 }: CartPageProps) => {
   const total = items.reduce((sum, item) => sum + (item.product.price * item.quantity), 0);
@@ -53,6 +55,18 @@ const CartPage = ({
     }
     
     // Open the Google Form URL directly
+    window.open("https://forms.gle/pCunH9M1Z3ez9VnU9", "_blank");
+  };
+
+  const handleBuyNow = (item: CartItem) => {
+    const orderDetails = `${item.product.name} (Size: ${item.size}) - Quantity: ${item.quantity}\nTotal Amount: ৳${(item.product.price * item.quantity).toFixed(2)}`;
+    
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(orderDetails).catch(() => {
+        console.log('Order details:', orderDetails);
+      });
+    }
+    
     window.open("https://forms.gle/pCunH9M1Z3ez9VnU9", "_blank");
   };
 
@@ -173,6 +187,15 @@ const CartPage = ({
                       >
                         <Trash2 className="h-3 w-3" />
                       </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="h-7 px-2 text-xs bg-green-100 text-green-700 hover:bg-green-200"
+                        onClick={() => handleBuyNow(item)}
+                      >
+                        <CreditCard className="h-3 w-3 mr-1" />
+                        Buy Now
+                      </Button>
                     </div>
                   </div>
                 </div>
@@ -219,10 +242,12 @@ const CartPage = ({
       {/* Bottom Navigation */}
       <BottomNav 
         cartCount={cartCount}
+        wishlistCount={wishlist.length}
         onHomeClick={onHomeClick}
         onSearchClick={onSearchClick}
         onCartClick={onClose}
         onContactClick={onContactClick}
+        onWishlistClick={onWishlistClick}
         activeTab="cart"
       />
     </div>
